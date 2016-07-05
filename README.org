@@ -1,0 +1,110 @@
+#+TITLE: README
+#+AUTHOR: lujun9972
+#+DATE: [2016-07-01 五 21:43]
+#+PROPERTY: tangle "emoji-recall.el"
+#+OPTIONS: ^:{}
+
+* Emoji Recall
+Emoji Recall 考验你的记忆力，它会每轮依次显示几个 Emoji 表情，然后让你回忆刚刚出现的 Emoji 表情顺序，必须全对才可以。
+#+BEGIN_SRC emacs-lisp
+  ;; -*- lexical-binding: t; -*-
+  (defgroup emoji-recall nil
+    "Emoji recall game"
+    :prefix "emoji-recall-"
+    :group 'game)
+#+END_SRC
+* 设计
+游戏界面应该包含两个buffer,一个buffer用于列出所有的emoji供玩家选择:
+#+BEGIN_SRC emacs-lisp
+  (defcustom emoji-recall-option-buffer "*emoji-recall-option*"
+    "buffer name for the options of emoji-recall"
+    :group 'emoji-recall
+    :type 'string)
+#+END_SRC
+
+还有一个buffer用于显示游戏场次,依次显示Emoji表情,显示玩家选择的Emoji表情顺序
+#+BEGIN_SRC emacs-lisp
+  (defcustom emoji-recall-answer-buffer "*emoji-recall-answer*"
+    "buffer name for the answers of emoji-recall"
+    :group 'emoji-recall
+    :type 'string)
+#+END_SRC
+
+Emoji的图片放在一个目录下,以png格式存储:
+#+BEGIN_SRC emacs-lisp
+  (defcustom emoji-recall-pics-dir (format "%semoji-cheat-sheet/" (file-name-directory (buffer-file-name)))
+    "Directory which used to store emoji pictures which should be png file"
+    :group 'emoji-recall
+    :type 'file)
+#+END_SRC
+
+** answer-buffer
+在answer-buffer中,我们先显示Round N: emoji1 emoji2 ... emojiN. 然后在最后一行留空用于存放玩家的答案.类似下面这样:
+
+[[./answer-buffer.png]]
+
+1. 我们需要一个变量存放目前时第几轮的游戏:
+   #+BEGIN_SRC emacs-lisp
+  (defvar emoji-recall-round 1
+    "Round of the game")
+   #+END_SRC
+
+2. 每个emoji在显示一段时间后要变成 =*= 号:
+
+   + 我们先定义这个时间
+     #+BEGIN_SRC emacs-lisp
+       (defcustom emoji-recall-display-interval 3
+         "Emoji becomes an asterisk after the number of seconds"
+         :group 'emoji-recall
+         :type 'number)
+     #+END_SRC
+
+   + 然后定义一个函数,该函数先在answer-buffer的合适位置处放置一个emoji,然后等待一段时间后将其变为 =*= 号
+     #+BEGIN_SRC emacs-lisp
+       (defun emoji-recall-insert-emoji (emoji)
+         "Insert an emoji and turn it into an asterisk after certain seconds"
+         (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
+           (goto-char (point-max))
+           (forward-line -1)
+           (move-end-of-line nil)
+           (let* ((emoji-file (concat emoji-recall-pics-dir emoji ".png"))
+                  (emoji-image (create-image emoji-file nil nil))
+                  (start (point))
+                  end)
+             (insert (propertize emoji 'display emoji-image))
+             (setq end (point))
+             (insert " ")
+             (run-at-time emoji-recall-display-interval nil (lambda ()
+                                                              (put-text-property start end
+                                                                                 'display "*" (get-buffer-create emoji-recall-answer-buffer)))))))
+     #+END_SRC
+
+   + 接下来再定义个函数画出第N轮的问题
+     #+BEGIN_SRC emacs-lisp
+       (defun emoji-recall-random-emoji ()
+         "Return random emoji stored in `emoji-recall-pics-dir"
+         (let* ((emojis (mapcar #'file-name-base (directory-files emoji-recall-pics-dir nil "\\.png$")))
+                (len (length emojis))
+                (idx (random len)))
+           (nth idx emojis)))
+
+       (defun emoji-recall-insert-random-emojis (N)
+         "Insert N random emojis"
+         (when (> N 0)
+           (emoji-recall-insert-emoji (emoji-recall-random-emoji))
+           (run-at-time emoji-recall-display-interval nil (lambda ()
+                                                            (emoji-recall-insert-random-emojis (- N 1))))))
+
+       (defun emoji-recall-draw-question (N)
+         "Draw round N question"
+         (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
+           (goto-char (point-max))
+           (move-beginning-of-line nil)
+           (delete-region (point) (point-max))
+           (insert (format "Round %d: " N))
+           (newline)
+           (insert "> ")
+           (emoji-recall-insert-random-emojis N)))
+     #+END_SRC
+** option-buffer
+在opton-buffer中需要列出所有可能的emoji供玩家选择,我们把每个emoji都做成一个button,点击一个button则在 =answer-buffer= 中添加一个emoji
