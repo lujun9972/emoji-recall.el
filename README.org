@@ -79,32 +79,32 @@ Emoji的图片放在一个目录下,以png格式存储:
                                                                                  'display "*" (get-buffer-create emoji-recall-answer-buffer)))))))
      #+END_SRC
 
-   + 接下来再定义个函数画出第N轮的问题
-     #+BEGIN_SRC emacs-lisp
-       (defun emoji-recall-random-emoji ()
-         "Return random emoji stored in `emoji-recall-pics-dir"
-         (let* ((emojis (mapcar #'file-name-base (directory-files emoji-recall-pics-dir nil "\\.png$")))
-                (len (length emojis))
-                (idx (random len)))
-           (nth idx emojis)))
+3. 接下来再定义个函数画出第N轮的问题
+   #+BEGIN_SRC emacs-lisp
+     (defun emoji-recall-random-emoji ()
+       "Return random emoji stored in `emoji-recall-pics-dir"
+       (let* ((emojis (mapcar #'file-name-base (directory-files emoji-recall-pics-dir nil "\\.png$")))
+              (len (length emojis))
+              (idx (random len)))
+         (nth idx emojis)))
 
-       (defun emoji-recall-insert-random-emojis (N)
-         "Insert N random emojis"
-         (when (> N 0)
-           (emoji-recall-insert-emoji (emoji-recall-random-emoji))
-           (run-at-time emoji-recall-display-interval nil (lambda ()
-                                                            (emoji-recall-insert-random-emojis (- N 1))))))
+     (defun emoji-recall-insert-random-emojis (N)
+       "Insert N random emojis"
+       (when (> N 0)
+         (emoji-recall-insert-emoji (emoji-recall-random-emoji))
+         (run-at-time emoji-recall-display-interval nil (lambda ()
+                                                          (emoji-recall-insert-random-emojis (- N 1))))))
 
-       (defun emoji-recall-draw-question (N)
-         "Draw round N question"
-         (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
-           (goto-char (point-max))
-           (move-beginning-of-line nil)
-           (delete-region (point) (point-max))
-           (insert (format "Round %d: " N))
-           (newline)
-           (insert "> ")
-           (emoji-recall-insert-random-emojis N)))
-     #+END_SRC
+     (defun emoji-recall-draw-question (N)
+       "Draw round N question"
+       (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
+         (goto-char (point-max))
+         (move-beginning-of-line nil)
+         (delete-region (point) (point-max))
+         (insert (format "Round %d: " N))
+         (newline)
+         (insert "> ")
+         (emoji-recall-insert-random-emojis N)))
+   #+END_SRC
 ** option-buffer
 在opton-buffer中需要列出所有可能的emoji供玩家选择,我们把每个emoji都做成一个button,点击一个button则在 =answer-buffer= 中添加一个emoji
