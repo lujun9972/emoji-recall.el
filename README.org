@@ -61,14 +61,17 @@ Emoji的图片放在一个目录下,以png格式存储:
 
    + 然后定义一个函数,该函数先在answer-buffer的合适位置处放置一个emoji,然后等待一段时间后将其变为 =*= 号
      #+BEGIN_SRC emacs-lisp
+       (defun emoji-recall-create-emoji-image (emoji)
+         "Create an image displaying EMOJI"
+         (let ((emoji-file (concat emoji-recall-pics-dir emoji ".png")))
+           (create-image emoji-file nil nil)))
        (defun emoji-recall-insert-emoji (emoji)
          "Insert an emoji and turn it into an asterisk after certain seconds"
          (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
            (goto-char (point-max))
            (forward-line -1)
            (move-end-of-line nil)
-           (let* ((emoji-file (concat emoji-recall-pics-dir emoji ".png"))
-                  (emoji-image (create-image emoji-file nil nil))
+           (let* ((emoji-image (emoji-recall-create-emoji-image))
                   (start (point))
                   end)
              (insert (propertize emoji 'display emoji-image))
@@ -81,9 +84,13 @@ Emoji的图片放在一个目录下,以png格式存储:
 
 3. 接下来再定义个函数画出第N轮的问题
    #+BEGIN_SRC emacs-lisp
+     (defun emoji-recall-list-all-emojis (emoji-dir)
+       "List all emojis stored in EMOJI-DIR"
+       (mapcar #'file-name-base (directory-files emoji-dir nil "\\.png$")))
+
      (defun emoji-recall-random-emoji ()
        "Return random emoji stored in `emoji-recall-pics-dir"
-       (let* ((emojis (mapcar #'file-name-base (directory-files emoji-recall-pics-dir nil "\\.png$")))
+       (let* ((emojis (emoji-recall-list-all-emojis emoji-recall-pics-dir))
               (len (length emojis))
               (idx (random len)))
          (nth idx emojis)))
@@ -106,5 +113,68 @@ Emoji的图片放在一个目录下,以png格式存储:
          (insert "> ")
          (emoji-recall-insert-random-emojis N)))
    #+END_SRC
-** option-buffer
-在opton-buffer中需要列出所有可能的emoji供玩家选择,我们把每个emoji都做成一个button,点击一个button则在 =answer-buffer= 中添加一个emoji
+** TODO option-buffer
+在opton-buffer中需要列出所有可能的emoji供玩家选择,玩家点击一个emoji则在 =answer-buffer= 中存放答案的区域添加一个emoji,当然为了放置玩家输错,需要允许玩家点击答案区域的emoji撤回该emoji.
+
+考虑到这些emoji都需要对点击事件做出响应,我们考虑把这些emoji做成button. 而且将 =answer-buffer= 中答案位置的emoji做成button还有个好处: 由于Elisp中的button其实就是带有一堆text/overlay属性的文本,这样在核对玩家给出的答案是否正确时,只需要将答案区域的文本与问题处的文本对比一下内容是否一致就行了.
+
+最后,我们还需要一个提交按钮,用于提交答案.
+
+*** answer-button
+
+1. 我们先定义答案区域emoji button的类型(暂时命名为answer-button吧),该类button要在被点击的时候将自己从答案区域删除掉.
+   #+BEGIN_SRC emacs-lisp
+     (define-button-type 'emoji-recall-answer-button
+       'action (lambda (b)
+                 (delete-region (button-start b)
+                                (+ 1 (button-end b)))) ;这里+1是因为每个emoji后面都带个空格
+       'follow-link t)
+   #+END_SRC
+
+*** option-button
+
+1. 然后定义option区域中emoji button的类型(暂时命名为option-button吧),该类型的button要在点击的时候,在答案区域插入一个answer-button.
+   #+BEGIN_SRC emacs-lisp
+     (defun emoji-recall-insert-answer-button (b)
+       (let ((label (button-label b))
+             (display (button-get b 'display)))
+         (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
+           (goto-char (point-max))
+           (insert-text-button label
+                               'display display
+                               :type 'emoji-recall-answer-button)
+           (insert " "))))                   ;这里必须带个空格时因为当相同的emoji靠在一起时,由于display属性相同,Emacs只显示一个emoji image
+
+     (define-button-type 'emoji-recall-option-button
+       'action #'emoji-recall-insert-answer-button
+       'follow-link t)
+   #+END_SRC
+
+2. 定义函数用于在option-buffer中插入option button
+   #+BEGIN_SRC emacs-lisp
+     (defun emoji-recall-insert-option-button (emoji)
+       "Insert an option-button with label EMOJI"
+       (let ((emoji-image (emoji-recall-create-emoji-image emoji)))
+         (with-current-buffer (get-buffer-create emoji-recall-option-buffer)
+           (goto-char (point-max))
+           (insert-text-button emoji
+                               'display emoji-image
+                               :type 'emoji-recall-option-button)
+           (insert " "))))
+
+
+     (defun emoji-recall-draw-options ()
+       "Draw all the opotions"
+       (mapc #'emoji-recall-insert-option-button
+             (emoji-recall-list-all-emojis emoji-recall-pics-dir)))
+   #+END_SRC
+
+*** submit-button
+1. 定义一个函数来检查玩家的回答是否正确
+
+   获取回答的答案
+
+   获取正确的答案
+
+   比较是否相等
+
