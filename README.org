@@ -71,7 +71,7 @@ Emoji的图片放在一个目录下,以png格式存储:
            (goto-char (point-max))
            (forward-line -1)
            (move-end-of-line nil)
-           (let* ((emoji-image (emoji-recall-create-emoji-image))
+           (let* ((emoji-image (emoji-recall-create-emoji-image emoji))
                   (start (point))
                   end)
              (insert (propertize emoji 'display emoji-image))
@@ -173,8 +173,30 @@ Emoji的图片放在一个目录下,以png格式存储:
 1. 定义一个函数来检查玩家的回答是否正确
 
    获取回答的答案
+   #+BEGIN_SRC emacs-lisp
+     (defun emoji-recall-get-user-answer ()
+       "Geth the user answer"
+       (with-current-buffer emoji-recall-answer-buffer
+         (goto-char (point-min))
+         (search-forward "> ")
+         (buffer-substring-no-properties (point) (point-max))))
+   #+END_SRC
 
    获取正确的答案
+   #+BEGIN_SRC emacs-lisp
+     (defun emoji-recall-get-correct-answer ()
+       "Geth the user answer"
+       (with-current-buffer emoji-recall-answer-buffer
+         (goto-char (point-max))
+         (search-backward-regexp "^Round [0-9]+: \\(.+\\)$")
+         (match-string-no-properties 1))) ;remove the last newline
+
+   #+END_SRC
 
    比较是否相等
+   #+BEGIN_SRC emacs-lisp
+     (defun emoji-recall-verify-user-answer ()
+       (string= (emoji-recall-get-user-answer)
+                (emoji-recall-get-correct-answer)))
+   #+END_SRC
 
