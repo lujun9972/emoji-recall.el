@@ -69,7 +69,7 @@ Emoji的图片放在一个目录下,以png格式存储:
          "Insert an emoji and turn it into an asterisk after certain seconds"
          (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
            (goto-char (point-max))
-           (forward-line -1)
+           (search-backward-regexp "^Round [0-9]+: \\(.+\\)$")
            (move-end-of-line nil)
            (let* ((emoji-image (emoji-recall-create-emoji-image emoji))
                   (start (point))
@@ -137,11 +137,13 @@ Emoji的图片放在一个目录下,以png格式存储:
    #+BEGIN_SRC emacs-lisp
      (defun emoji-recall-insert-answer-button (b)
        (let ((label (button-label b))
-             (display (button-get b 'display)))
+             (display (button-get b 'display))
+             (help-echo (button-get b 'help-echo)))
          (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
            (goto-char (point-max))
            (insert-text-button label
                                'display display
+                               'help-echo help-echo
                                :type 'emoji-recall-answer-button)
            (insert " "))))                   ;这里必须带个空格时因为当相同的emoji靠在一起时,由于display属性相同,Emacs只显示一个emoji image
 
@@ -159,14 +161,17 @@ Emoji的图片放在一个目录下,以png格式存储:
            (goto-char (point-max))
            (insert-text-button emoji
                                'display emoji-image
+                               'help-echo emoji
                                :type 'emoji-recall-option-button)
            (insert " "))))
 
 
      (defun emoji-recall-draw-options ()
        "Draw all the opotions"
-       (mapc #'emoji-recall-insert-option-button
-             (emoji-recall-list-all-emojis emoji-recall-pics-dir)))
+       (with-current-buffer (get-buffer-create emoji-recall-option-buffer)
+         (erase-buffer)
+         (mapc #'emoji-recall-insert-option-button
+               (emoji-recall-list-all-emojis emoji-recall-pics-dir))))
    #+END_SRC
 
 *** submit-button
@@ -200,3 +205,12 @@ Emoji的图片放在一个目录下,以png格式存储:
                 (emoji-recall-get-correct-answer)))
    #+END_SRC
 
+
+* test
+#+BEGIN_SRC emacs-lisp
+  (emoji-recall-draw-question 1)
+  (emoji-recall-draw-options)
+  (emoji-recall-get-user-answer)
+  (emoji-recall-get-corrct-answer)
+  (emoji-recall-verify-user-answer)
+#+END_SRC
