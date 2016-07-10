@@ -283,9 +283,7 @@ Emoji的图片放在一个目录下,以png格式存储:
     (interactive)
     (switch-to-buffer emoji-recall-answer-buffer)
     (erase-buffer)
-    (insert "Congratulations! You Got Round %d" emoji-recall-round)
-    (newline)
-    (insert "Press any key to quit !")
+    (insert (propertize (format "Game Over! You Got Round %d\nPress any key to quit !" emoji-recall-round) 'display '(height 2)))
     (read-char)
     (emoji-recall-game-quit))
 #+END_SRC
