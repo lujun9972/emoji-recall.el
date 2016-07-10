@@ -116,7 +116,7 @@ Emoji的图片放在一个目录下,以png格式存储:
          (emoji-recall-insert-random-emojis N)))
    #+END_SRC
 ** option-buffer
-在opton-buffer中需要列出所有可能的emoji供玩家选择,玩家点击一个emoji则在 =answer-buffer= 中存放答案的区域添加一个emoji,当然为了放置玩家输错,需要允许玩家点击答案区域的emoji撤回该emoji.
+在opton-buffer中需要列出所有可能的emoji供玩家选择,玩家点击一个emoji则在 =answer-buffer= 中存放答案的区域添加一个emoji,当然为了防止玩家输错,需要允许玩家点击答案区域的emoji撤回该emoji.
 
 考虑到这些emoji都需要对点击事件做出响应,我们考虑把这些emoji做成button. 而且将 =answer-buffer= 中答案位置的emoji做成button还有个好处: 由于Elisp中的button其实就是带有一堆text/overlay属性的文本,这样在核对玩家给出的答案是否正确时,只需要将答案区域的文本与问题处的文本对比一下内容是否一致就行了.
 
@@ -135,7 +135,7 @@ Emoji的图片放在一个目录下,以png格式存储:
 
 *** option-button
 
-1. 然后定义option区域中emoji button的类型(暂时命名为option-button吧),该类型的button要在点击的时候,在答案区域插入一个answer-button.
+1. 然后定义option区域中emoji button的类型(暂时命名为option-button吧),该类型的button要在点击的时候,在答案区域插入一个answer-button. 当然,其插入的answer-button的显示与label应该与option-button一致.
    #+BEGIN_SRC emacs-lisp
      (defun emoji-recall-insert-answer-button (b)
        (let ((label (button-label b))
@@ -169,7 +169,7 @@ Emoji的图片放在一个目录下,以png格式存储:
 
 
      (defun emoji-recall-draw-options ()
-       "Draw all the opotions"
+       "Draw all the options"
        (with-current-buffer (get-buffer-create emoji-recall-option-buffer)
          (erase-buffer)
          (mapc #'emoji-recall-insert-option-button
