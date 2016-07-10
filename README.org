@@ -5,6 +5,8 @@
 #+OPTIONS: ^:{}
 
 * Emoji Recall
+*献给脸盲症的你~~~~~~~~~~~~~*
+
 Emoji Recall 考验你的记忆力，它会每轮依次显示几个 Emoji 表情，然后让你回忆刚刚出现的 Emoji 表情顺序，必须全对才可以。
 #+BEGIN_SRC emacs-lisp
   ;; -*- lexical-binding: t; -*-
@@ -69,7 +71,7 @@ Emoji的图片放在一个目录下,以png格式存储:
          "Insert an emoji and turn it into an asterisk after certain seconds"
          (with-current-buffer (get-buffer-create emoji-recall-answer-buffer)
            (goto-char (point-max))
-           (search-backward-regexp "^Round [0-9]+: \\(.+\\)$")
+           (search-backward-regexp "^Round [0-9]+: \\(.*\\)$")
            (move-end-of-line nil)
            (let* ((emoji-image (emoji-recall-create-emoji-image emoji))
                   (start (point))
@@ -113,7 +115,7 @@ Emoji的图片放在一个目录下,以png格式存储:
          (insert "> ")
          (emoji-recall-insert-random-emojis N)))
    #+END_SRC
-** TODO option-buffer
+** option-buffer
 在opton-buffer中需要列出所有可能的emoji供玩家选择,玩家点击一个emoji则在 =answer-buffer= 中存放答案的区域添加一个emoji,当然为了放置玩家输错,需要允许玩家点击答案区域的emoji撤回该emoji.
 
 考虑到这些emoji都需要对点击事件做出响应,我们考虑把这些emoji做成button. 而且将 =answer-buffer= 中答案位置的emoji做成button还有个好处: 由于Elisp中的button其实就是带有一堆text/overlay属性的文本,这样在核对玩家给出的答案是否正确时,只需要将答案区域的文本与问题处的文本对比一下内容是否一致就行了.
@@ -198,19 +200,119 @@ Emoji的图片放在一个目录下,以png格式存储:
 
    #+END_SRC
 
-   比较是否相等
+   检查玩家输入的答案是否正确
    #+BEGIN_SRC emacs-lisp
      (defun emoji-recall-verify-user-answer ()
        (string= (emoji-recall-get-user-answer)
                 (emoji-recall-get-correct-answer)))
    #+END_SRC
 
+2. 定义submit-button的类型. 该类型的button要在点击的时候,要检查玩家输入的答案是否正确,若正确则进入下一关,否则游戏结束.
+   #+BEGIN_SRC emacs-lisp
+     (define-button-type 'emoji-recall-submit-button
+       'action (lambda (b)
+                 (if (emoji-recall-verify-user-answer)
+                     (emoji-recall-next-level)
+                   (emoji-recall-game-over)))
+       'follow-link t)
+   #+END_SRC
 
-* test
+3. 定义函数用于在option-buffer中插入option button
+   #+BEGIN_SRC emacs-lisp
+     (defun emoji-recall-draw-submit-button ()
+       "Draw the submit-button"
+       (with-current-buffer (get-buffer-create emoji-recall-option-buffer)
+         (goto-char (point-max))
+         (insert-text-button "Submit"
+                             :type 'emoji-recall-submit-button)))
+   #+END_SRC
+
+** 其他
+
+*** 游戏开始时
+
+1. 保存window configuration
+2. 画出游戏界面
+
 #+BEGIN_SRC emacs-lisp
+  (defvar emoji-recall-orign-window-configuration nil
+    "orign widndow configuration")
+
+  ;;;###autoload
+  (defun emoji-recall-game-start ()
+    (interactive)
+    (setq emoji-recall-round 1)
+    (setq emoji-recall-orign-window-configuration (current-window-configuration))
+    (switch-to-buffer (get-buffer-create emoji-recall-answer-buffer))
+    (erase-buffer)
+    (delete-other-windows)
+    (split-window-below)
+    (windmove-down)
+    (switch-to-buffer (get-buffer-create emoji-recall-option-buffer))
+    (emoji-recall-draw-question emoji-recall-round)
+    (emoji-recall-draw-options)
+    (emoji-recall-draw-submit-button))
+#+END_SRC
+
+*** 下一关
+
+1. round加一
+2. 插入新的问题
+3. 清空原答案
+
+#+BEGIN_SRC emacs-lisp
+  (defun emoji-recall-next-level ()
+    (setq emoji-recall-round (+ 1 emoji-recall-round))
+    (emoji-recall-draw-question emoji-recall-round)
+    (with-current-buffer emoji-recall-answer-buffer
+      (goto-char (point-min))
+      (search-forward "> ")
+      (delete-region (point) (point-max))))
+#+END_SRC
+
+*** 游戏结束时
+
+1. 清空answer-buffer的内容
+2. 显示游戏结束画面
+   
+#+BEGIN_SRC emacs-lisp
+
+  ;;;###autoload
+  (defun emoji-recall-game-over ()
+    "Game over and show achievements"
+    (interactive)
+    (switch-to-buffer emoji-recall-answer-buffer)
+    (erase-buffer)
+    (insert "Congratulations! You Got Round %d" emoji-recall-round)
+    (newline)
+    (insert "Press any key to quit !")
+    (read-char)
+    (emoji-recall-game-quit))
+#+END_SRC
+
+*** 游戏退出
+
+1. 删除answer-buffer
+2. 删除option-buffer
+3. 还原window configuration
+   
+#+BEGIN_SRC emacs-lisp
+  ;;;###autoload
+  (defun emoji-recall-game-quit ()
+    "Quit game"
+    (interactive)
+    (kill-buffer emoji-recall-answer-buffer)
+    (kill-buffer emoji-recall-option-buffer)
+    (when emoji-recall-orign-window-configuration
+      (set-window-configuration emoji-recall-orign-window-configuration)
+      (set emoji-recall-orign-window-configuration nil)))
+#+END_SRC
+* test
+#+BEGIN_SRC emacs-lisp :tangle "test.el"
   (emoji-recall-draw-question 1)
   (emoji-recall-draw-options)
   (emoji-recall-get-user-answer)
   (emoji-recall-get-corrct-answer)
   (emoji-recall-verify-user-answer)
+  (emoji-recall-game-start)
 #+END_SRC
