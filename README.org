@@ -4,12 +4,50 @@
 #+PROPERTY: tangle "emoji-recall.el"
 #+OPTIONS: ^:{}
 
+* package header
+#+BEGIN_SRC emacs-lisp
+  ;;; emoji-recall.el --- How many emoji can you recall from memory?  -*- lexical-binding: t; -*-
+
+  ;; Copyright (C) 2004-2016 DarkSun <lujun9972@gmail.com>
+
+  ;; Author: DarkSun <lujun9972@gmail.com>
+  ;; Created: 2016-07-11
+  ;; Version: 0.1
+  ;; Keywords: game
+  ;; URL: https://github.com/lujun9972/emoji-recall.el
+
+  ;; This file is NOT part of GNU Emacs.
+
+  ;; This program is free software; you can redistribute it and/or modify
+  ;; it under the terms of the GNU General Public License as published by
+  ;; the Free Software Foundation, either version 3 of the License, or
+  ;; (at your option) any later version.
+
+  ;; This program is distributed in the hope that it will be useful,
+  ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ;; GNU General Public License for more details.
+
+  ;; You should have received a copy of the GNU General Public License
+  ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  ;;; Source code
+  ;;
+  ;; emoji-recall's code can be found here:
+  ;;   http://github.com/lujun9972/emoji-recall.el
+
+  ;;; Commentary:
+
+  ;; emoji-recall is a portable verson of  [[https://itunes.apple.com/app/emoji-recall/id1114387537][emoji-recall]]
+
+  ;;; Code:
+#+END_SRC
 * Emoji Recall
 *献给脸盲症的你~~~~~~~~~~~~~*
 
 Emoji Recall 考验你的记忆力，它会每轮依次显示几个 Emoji 表情，然后让你回忆刚刚出现的 Emoji 表情顺序，必须全对才可以。
 #+BEGIN_SRC emacs-lisp
-  ;; -*- lexical-binding: t; -*-
+  ;; 
   (defgroup emoji-recall nil
     "Emoji recall game"
     :prefix "emoji-recall-"
@@ -313,4 +351,10 @@ Emoji的图片放在一个目录下,以png格式存储:
   (emoji-recall-get-corrct-answer)
   (emoji-recall-verify-user-answer)
   (emoji-recall-game-start)
+#+END_SRC
+* feature
+#+BEGIN_SRC emacs-lisp
+  (provide 'emoji-recall)
+
+  ;; emoji-recall.el ends here
 #+END_SRC

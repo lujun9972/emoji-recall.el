@@ -230,3 +230,7 @@
   (when emoji-recall-orign-window-configuration
     (set-window-configuration emoji-recall-orign-window-configuration)
     (setq emoji-recall-orign-window-configuration nil)))
+
+(provide 'emoji-recall)
+
+;; emoji-recall.el ends here
