@@ -50,7 +50,10 @@
   :group 'emoji-recall
   :type 'string)
 
-(defcustom emoji-recall-pics-dir (format "%semoji-cheat-sheet/" (file-name-directory (buffer-file-name)))
+(defcustom emoji-recall-pics-dir (concat (if load-file-name
+                                             (file-name-directory load-file-name)
+                                           default-directory)
+                                         "semoji-cheat-sheet/")
   "Directory which used to store emoji pictures which should be png file"
   :group 'emoji-recall
   :type 'file)
