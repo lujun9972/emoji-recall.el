@@ -303,7 +303,7 @@ Emoji的图片放在一个目录下,以png格式存储:
     (kill-buffer emoji-recall-option-buffer)
     (when emoji-recall-orign-window-configuration
       (set-window-configuration emoji-recall-orign-window-configuration)
-      (set emoji-recall-orign-window-configuration nil)))
+      (setq emoji-recall-orign-window-configuration nil)))
 #+END_SRC
 * test
 #+BEGIN_SRC emacs-lisp :tangle "test.el"
