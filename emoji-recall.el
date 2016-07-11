@@ -233,4 +233,4 @@
 
 (provide 'emoji-recall)
 
-;; emoji-recall.el ends here
+;;; emoji-recall.el ends here
