@@ -72,8 +72,11 @@ Emoji Recall 考验你的记忆力，它会每轮依次显示几个 Emoji 表情
 
 Emoji的图片放在一个目录下,以png格式存储:
 #+BEGIN_SRC emacs-lisp
-  (defcustom emoji-recall-pics-dir (format "%semoji-cheat-sheet/" (file-name-directory (buffer-file-name)))
-    "Directory which used to store emoji pictures which should be png file"
+  (defcustom emoji-recall-pics-dir (concat (if load-file-name
+                                               (file-name-directory load-file-name)
+                                             default-directory)
+                                           "semoji-cheat-sheet/")
+    "Directory storing emoji pictures which should be png file"
     :group 'emoji-recall
     :type 'file)
 #+END_SRC
@@ -356,5 +359,5 @@ Emoji的图片放在一个目录下,以png格式存储:
 #+BEGIN_SRC emacs-lisp
   (provide 'emoji-recall)
 
-  ;; emoji-recall.el ends here
+  ;;; emoji-recall.el ends here
 #+END_SRC

@@ -54,7 +54,7 @@
                                              (file-name-directory load-file-name)
                                            default-directory)
                                          "semoji-cheat-sheet/")
-  "Directory which used to store emoji pictures which should be png file"
+  "Directory storing emoji pictures which should be png file"
   :group 'emoji-recall
   :type 'file)
 
