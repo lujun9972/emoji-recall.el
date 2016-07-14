@@ -5,6 +5,7 @@
 ;; Author: DarkSun <lujun9972@gmail.com>
 ;; Created: 2016-07-11
 ;; Version: 0.1
+;; Package-Requires: ((emacs "24"))
 ;; Keywords: game
 ;; URL: https://github.com/lujun9972/emoji-recall.el
 
@@ -53,7 +54,7 @@
 (defcustom emoji-recall-pics-dir (concat (if load-file-name
                                              (file-name-directory load-file-name)
                                            default-directory)
-                                         "semoji-cheat-sheet/")
+                                         "emoji-cheat-sheet/")
   "Directory storing emoji pictures which should be png file"
   :group 'emoji-recall
   :type 'file)
@@ -214,7 +215,6 @@
     (search-forward "> ")
     (delete-region (point) (point-max))))
 
-;;;###autoload
 (defun emoji-recall-game-over ()
   "Game over and show achievements"
   (interactive)
@@ -224,7 +224,6 @@
   (read-char)
   (emoji-recall-game-quit))
 
-;;;###autoload
 (defun emoji-recall-game-quit ()
   "Quit game"
   (interactive)

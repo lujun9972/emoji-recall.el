@@ -319,7 +319,6 @@ Emoji的图片放在一个目录下,以png格式存储:
    
 #+BEGIN_SRC emacs-lisp
 
-  ;;;###autoload
   (defun emoji-recall-game-over ()
     "Game over and show achievements"
     (interactive)
@@ -337,7 +336,6 @@ Emoji的图片放在一个目录下,以png格式存储:
 3. 还原window configuration
    
 #+BEGIN_SRC emacs-lisp
-  ;;;###autoload
   (defun emoji-recall-game-quit ()
     "Quit game"
     (interactive)
