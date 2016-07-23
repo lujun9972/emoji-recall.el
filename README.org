@@ -6,6 +6,7 @@
 *献给脸盲症的你~~~~~~~~~~~~~*
 
 Emoji Recall 考验你的记忆力，它会每轮依次显示几个 Emoji 表情，然后让你回忆刚刚出现的 Emoji 表情顺序，必须全对才可以。
+[[file:./emoji-recall.gif]]
 #+BEGIN_SRC emacs-lisp
   ;; 
   (defgroup emoji-recall nil
