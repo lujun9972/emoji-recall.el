@@ -1,0 +1,18 @@
+#+TITLE: emoji-recall
+#+AUTHOR: lujun9972
+#+DATE: [2016-07-23 六 10:53]
+#+PROPERTY: tangle "emoji-recall.el"
+#+OPTIONS: ^:{}
+由于#+INCLUDE只对export生效,对tangle不生效(参见http://lists.gnu.org/archive/html/emacs-orgmode/2010-09/msg00808.html)
+因此在tangle出代码时,需要先export-org为另一个org,然后在那个export-org中tangle代码
+#+BEGIN_SRC emacs-lisp :tangle no :exports none :results file
+  (require 'ox-org)
+  (org-babel-tangle-file (org-org-export-to-org)) 
+#+END_SRC
+
+#+RESULTS:
+[[file:(/home/lujun9972/github/emoji-recall.el/emoji-recall.el)]]
+
+#+INCLUDE: "package-header.org" :only-contents t
+#+INCLUDE: "README.org" :only-contents t
+#+INCLUDE: "feature.org" :only-contents t

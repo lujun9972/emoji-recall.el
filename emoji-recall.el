@@ -221,7 +221,8 @@
   (switch-to-buffer emoji-recall-answer-buffer)
   (erase-buffer)
   (insert (propertize (format "Game Over! You Got Round %d\nPress any key to quit !" emoji-recall-round) 'display '(height 2)))
-  (read-char)
+  (while (not (input-pending-p))
+    (sit-for 0.01))
   (emoji-recall-game-quit))
 
 (defun emoji-recall-game-quit ()

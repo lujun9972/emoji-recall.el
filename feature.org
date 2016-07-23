@@ -1,0 +1,6 @@
+* feature
+#+BEGIN_SRC emacs-lisp
+  (provide 'emoji-recall)
+
+  ;;; emoji-recall.el ends here
+#+END_SRC
