@@ -7,11 +7,11 @@
 因此在tangle出代码时,需要先export-org为另一个org,然后在那个export-org中tangle代码
 #+BEGIN_SRC emacs-lisp :tangle no :exports none :results file
   (require 'ox-org)
-  (org-babel-tangle-file (org-org-export-to-org)) 
+  (car (org-babel-tangle-file (org-org-export-to-org)))
 #+END_SRC
 
 #+RESULTS:
-[[file:(/home/lujun9972/github/emoji-recall.el/emoji-recall.el)]]
+[[file:/home/lujun9972/github/emoji-recall.el/emoji-recall.el]]
 
 #+INCLUDE: "package-header.org" :only-contents t
 #+INCLUDE: "README.org" :only-contents t
